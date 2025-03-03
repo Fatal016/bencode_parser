@@ -1,0 +1,4 @@
+#!/bin/bash
+
+wget -O test.torrent $1
+time ./bencode.bin test.torrent
