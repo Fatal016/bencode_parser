@@ -1,13 +1,16 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -O3 -g
+CFLAGS = -Wall -Wextra -std=c99 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition -Wno-unused-parameter -g
 
 CC_SOURCES = \
 Core/Src/bencode.c \
+Core/Src/bencode_utils.c \
 Core/Src/main.c
 
 HEADERS = \
 Core/Inc/bencode.h \
-Core/Inc/main.h
+Core/Inc/bencode_utils.h \
+Core/Inc/main.h \
+Core/Inc/codes.h
 
 EXECUTABLE = bencode.bin
 

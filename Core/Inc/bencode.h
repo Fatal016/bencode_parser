@@ -1,112 +1,106 @@
 #ifndef H_BENCODE
 #define H_BENCODE 	
 
-#define NOT_A_TYPE NULL
-#define BUFFER_EXCEEDED -1
-#define END_OF_TYPE 1
-#define DATA_LENGTH_EXCEEDED -2
-#define CONVERSION_FAILED -3
-#define CONVERSION_SUCCESS 0
+#include <stdint.h>
 
-#define PARSE_SUCCESS 0
-#define PARSE_FAILURE -1
+#define BS 128 	/* Buffer Size */
+#define ALS 256 /* Announce List Size */
+#define IFS 128 /* Info File Size */
+#define FPS 10 	/* File Path Size */
+#define ULS 1 	/* Url List Size */
 
-#define IGNORE_FLAG -1
-
-/* Struct for bencode -> info -> files */
-struct info_file {
-	unsigned long int* length;
-	char** path;
-
-	int file_path_index;
+/* Bencode File (bencode -> info -> files) */
+struct bf {
+	uint32_t* l;	/* length */
+	char** p;	/* path */
+	uint16_t fpi;	/* file path index */
 };
 
-/* Struct for bencode -> info */
-struct bencode_info {
-	struct info_file** files;
-	char* name;
-	long unsigned int* length;
-	long unsigned int* piece_length;
-	char* pieces;
+/* Bencode Info (bencode -> info) */
+struct bi {
+	struct bf** f; 	/* files */
+	char* n;	/* name */
+	uint32_t* l;	/* length (single file) */
+	uint32_t* pl;	/* piece length */
+	char* p;	/* pieces */
 };
 
 /* Core struct for storing information parsed from .torrent file */
-struct bencode_module {
+/* Bencode Module */
+struct bm {
 	
 	/**************************/
 	/*** Bencode Components ***/
 	/**************************/
 
-	char* announce;
-	char** announce_list;
-	char* comment;
-	char* created_by;
-	long long int* creation_date;
-	char* encoding;
-	struct bencode_info *info;	
-	char** url_list;
-	char* info_hash;
-	char* info_hash_human_readable;
+	char* a;	/* announce */
+	char** al;	/* announce_list */
+	char* c;	/* comment */
+	char* cb;	/* created by */
+	uint32_t* cd;	/* creation_date */
+	char* e;	/* encoding */
+	struct bi *i;	/* info */
+	char** ul;	/* url list */
+	char* ih;	/* info hash */
+	char* ihhr;	/* info hash human readable */
 
 	/***********************/
 	/*** List Parameters ***/
 	/***********************/	
 
-	/* Indexes for list components */
-	int announce_list_index;
-	int info_file_index;
-	int file_path_index;
-	int url_list_index;
+	/* List features */
+	uint16_t ali;	/* announce_list_index */
+	uint16_t ifi; 	/* info_file_index */
+	uint16_t fpi; 	/* file_path_index */
+	uint16_t uli; 	/* url_list_index */
 
-	/* Sizes for list components */
-	int announce_list_size;
-	int info_file_size;
-	int file_path_size;
-	int url_list_size;
+	uint16_t als; 	/* announce_list_size */
+	uint16_t ifs;	/* info_file_size */
+	uint16_t fps; 	/* file_path_size */
+	uint16_t uls;	/* url_list_size */
 
 	/* Tracking for features of lists */
-	void* head_pointer;
-	int* index_pointer;
-	int* size_pointer;
+	void* hp; 	/* head pointer */
+	uint16_t* ip; 	/* index pointer */
+	uint16_t* sp; 	/* size pointer */
 
-	
 	/************************/
 	/*** Other Parameters ***/
 	/************************/
 
 	/* Info Hash Parameters */
-	size_t info_start;
-	size_t info_end;
+	int64_t* is; 	/* info start */
+	int64_t* ie; 	/* info end */
 
-	/* Input buffer for filestream */
-	char* buffer;
-	long long int buffer_size;
+	/* Buffer Parameters */
+	uint32_t bs; 	/* buffer size */
+	char* b;	/* buffer */
 };
 
-/* Serves as template for return-type of 'identify' */
-typedef int (*id)(struct bencode_module*, FILE*);
+/* Function pointer template for return-type of idt */
+typedef uint8_t (*id)(struct bm*, FILE*);
 
 /* For identifying type of component being read */
-id identify(char c);
+id idt(int);
 
 /* Bencode component parsing functions definitions */
-int dictionary(struct bencode_module*, FILE*);
-int list(struct bencode_module*, FILE*);
-int integer(struct bencode_module*, FILE*);
-int end(struct bencode_module* __attribute__((unused)), FILE* __attribute__((unused)));
+uint8_t d(struct bm*, FILE*); 	/* dictionary */
+uint8_t l(struct bm*, FILE*);	/* list */
+uint8_t i(struct bm*, FILE*);	/* integer */
+uint8_t e(struct bm*, FILE*);	/* end */
 
 /* Root function for parsing .torrent file */
-int parse_single(char*, struct bencode_module*);
-
-int free_bencode_module(struct bencode_module*);
+int p(char*, struct bm*); /* parse */
 
 /* Helper Functions */
-void parse_key(struct bencode_module*, FILE*);
-int sha1(struct bencode_module*, char*, size_t*);
 
-int verify_int(char*, long long int*);
+/* Parse Key */
+uint8_t pdk(struct bm*, FILE*); /* parse dictionary key */
 
-/* Tools */
-void printBencode(struct bencode_module *bencode);
+/* Parse Value Functions */
+uint8_t pdv(struct bm*, FILE*); /* parse dictionary value */
+uint8_t plv(struct bm*, FILE*); /* parse list value */
+
+//int sha1(struct bm*, char*, size_t*);
 
 #endif
