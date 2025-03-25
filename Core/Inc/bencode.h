@@ -101,6 +101,10 @@ uint8_t pdk(struct bm*, FILE*); /* parse dictionary key */
 uint8_t pdv(struct bm*, FILE*); /* parse dictionary value */
 uint8_t plv(struct bm*, FILE*); /* parse list value */
 
-//int sha1(struct bm*, char*, size_t*);
+/* Logic Functions */
+uint8_t cih(struct bm*, FILE*); /* calculate info hash */
+uint8_t cs(struct bm*, char*, size_t*); /* calculate sha */
+uint8_t sha1(struct bm*, char*, size_t*);
+
 
 #endif

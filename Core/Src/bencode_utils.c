@@ -171,6 +171,12 @@ uint8_t fbm(struct bm *b) {
 	if (b->ihhr != NULL) {
 		free(b->ihhr);
 	}
+	if (b->is != NULL) {
+		free(b->is);
+	}
+	if (b->ie != NULL) {
+		free(b->ie);
+	}
 	if (b->b != NULL) {
 		free(b->b);
 	}

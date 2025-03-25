@@ -8,6 +8,8 @@
 #include "../Inc/bencode_utils.h"
 #include "../Inc/codes.h"
 
+#include <openssl/evp.h>
+
 int p(char *f, struct bm* b) {
 
 	uint8_t r;
@@ -105,15 +107,6 @@ uint8_t l(struct bm *b, FILE *fp)
 				b->b[i] = '\0';
 				r = rv(b, fp);
 				if (r != 0) return r;
-	/* Extending size of pointer array if necessary. */
-	/* Not functional as realloc not preserving properly... */	
-	/*
-	if (*bencode->index_pointer == *bencode->size_pointer) {
-	*bencode->size_pointer *= 2;
-	bencode->head_pointer = realloc((char **)bencode->head_pointer, 
-		*bencode->size_pointer);
-					}
-					*/
 				r = plv(b, fp);
 				if (r != 0) return r;
 				i = 0;
@@ -159,7 +152,8 @@ uint8_t e(struct bm *b, FILE *fp) {
 	return END_OF_TYPE;
 }
 
-uint8_t pdk(struct bm *b, FILE *fp) {
+uint8_t pdk(struct bm *b, FILE *fp)
+{
 	if (strcmp(b->b, "announce") == 0) {
 		
 		b->a = (char *)malloc(BS * sizeof(char));
@@ -254,38 +248,50 @@ uint8_t pdk(struct bm *b, FILE *fp) {
 		b->hp = (void *)IGNORE_FLAG;	
 	}
 
-	return 0;
+	return PARSE_SUCCESS;
+}
+
+uint8_t cih(struct bm *b, FILE *fp)
+{
+	size_t lr;
+	uint32_t is;
+	char* ib;
+
+	*b->ie = ftell(fp);
+	if (*b->ie == -1) {
+		if (errno != 0) {
+			perror("Error encountered while attempting to "
+				"capture stream location in file: ");
+		}
+	}
+	is = *b->ie - *b->is + 1;
+	ib = (char *)malloc(is * sizeof(char));
+	fseek(fp, *b->is, SEEK_SET);	
+	lr = fread(ib, 1, is, fp);
+
+	sha1(b, ib, &lr);
+	
+	fseek(fp, *b->ie, SEEK_SET);
+
+	free(ib);
+	return PARSE_SUCCESS;
 }
 
 uint8_t pdv(struct bm *b, FILE *fp)
 {
+	uint8_t r;
+
 	if (b->hp != (void *)IGNORE_FLAG) {
 		strcpy((char *)b->hp, b->b);
-		
 		if (b->i != NULL) {
 			if (b->hp == (void *)b->i->p) {
-				
-				size_t lr;
-				uint32_t is;
-				char* ib;
-
-				*b->ie = ftell(fp);							
-
-				is = *b->ie - *b->is + 1;
-				ib = (char *)malloc(is * sizeof(char));
-				fseek(fp, *b->is, SEEK_SET);	
-				lr = fread(ib, 1, is, fp);
-	
-				//sha1(bencode, info_buffer, &len_read);
-				
-				fseek(fp, *b->ie, SEEK_SET);
-
-				free(ib);
+				r = cih(b, fp);
+				if (r != 0) return r;
 			}	
 		}						
 	}
 	b->hp = NULL;
-	return 0;
+	return PARSE_SUCCESS;
 }
 
 uint8_t plv(struct bm *b, FILE *fp)
@@ -295,10 +301,10 @@ uint8_t plv(struct bm *b, FILE *fp)
 		strcpy(((char **)b->hp)[*b->ip], b->b);
 		(*b->ip)++;
 	}
-	return 0;
+	return PARSE_SUCCESS;
 }
-/*
-int sha1(struct bencode_module *bencode, char *info_dict, size_t *len) {
+
+uint8_t sha1(struct bm *bencode, char *info_dict, size_t *len) {
 
 	EVP_MD_CTX *ctx;
 	ctx = EVP_MD_CTX_new();
@@ -312,7 +318,7 @@ int sha1(struct bencode_module *bencode, char *info_dict, size_t *len) {
 
 	EVP_DigestInit_ex(ctx, md, NULL);
 
-	need to create defines for v1 and v2 lengths, 40 and 64 characters depending on sha1 sha256
+//	need to create defines for v1 and v2 lengths, 40 and 64 characters depending on sha1 sha256
 
 	unsigned char md_value[40];
 	unsigned int md_len;
@@ -320,26 +326,26 @@ int sha1(struct bencode_module *bencode, char *info_dict, size_t *len) {
 
 	EVP_DigestFinal_ex(ctx, md_value, &md_len);
 	
-	bencode->info_hash = (char *)malloc(40 * sizeof(char));
-	bencode->info_hash_human_readable = (char *)malloc(40 * sizeof(char));
+	bencode->ih = (char *)malloc(41 * sizeof(char));
+	bencode->ihhr = (char *)malloc(41 * sizeof(char));
 	
-	memcpy(bencode->info_hash, md_value, 40);
-	//strcpy((char *)bencode->info_hash, (char *)md_value);
+	memcpy(bencode->ih, md_value, 40);
+	strcpy((char *)bencode->ih, (char *)md_value);
 
-	char *ptr = bencode->info_hash_human_readable;
+	char *ptr = bencode->ihhr;
 
 	for (int i = 0; i < 20; i++) {
 		ptr += sprintf(ptr, "%02x", md_value[i]);
+		printf("%02x", md_value[i]);
 	}
+	printf("\n");
 
 	EVP_MD_CTX_free(ctx);
 
-	bencode->info_hash_human_readable[40] = '\0';
+	bencode->ihhr[40] = '\0';
 
 	return 0;
 }
-*/
-
 
 id idt(int c) {
 	switch (c) {

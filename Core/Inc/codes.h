@@ -18,8 +18,11 @@
 
 
 /* Internal Codes/Flags */
-#define NOT_A_TYPE NULL
 #define IGNORE_FLAG -1
+
+#define NOT_A_TYPE NULL
 #define END_OF_TYPE 1
+
+#define ALLOCATION_SUCCESS 101
 
 #endif
