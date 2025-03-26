@@ -149,11 +149,15 @@ uint8_t fbm(struct bm *b) {
 			for (j = 0; j < b->i->f[i]->fpi; j++) {
 				free(b->i->f[i]->p[j]);
 			}
+			free(b->i->f[i]->p);
 			free(b->i->f[i]->l);
 			free(b->i->f[i]);
 		}
+		free(b->i->f);
 		free(b->i->n);
-		free(b->i->l);
+		if (b->i->l != NULL) {
+			free(b->i->l);
+		}
 		free(b->i->pl);
 		free(b->i->p);
 		free(b->i);

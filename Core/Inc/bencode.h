@@ -90,7 +90,7 @@ uint8_t i(struct bm*, FILE*);	/* integer */
 uint8_t e(struct bm*, FILE*);	/* end */
 
 /* Root function for parsing .torrent file */
-int p(char*, struct bm*); /* parse */
+uint8_t p(char*, struct bm*); /* parse */
 
 /* Helper Functions */
 

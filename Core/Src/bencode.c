@@ -10,7 +10,7 @@
 
 #include <openssl/evp.h>
 
-int p(char *f, struct bm* b) {
+uint8_t p(char *f, struct bm* b) {
 
 	uint8_t r;
 	int32_t fc;
@@ -199,6 +199,7 @@ uint8_t pdk(struct bm *b, FILE *fp)
 
 		b->i->f = NULL;
 		b->i->p = NULL;
+		b->i->l = NULL;
 
 		b->is = (int64_t *)malloc(sizeof(int64_t));
 		if (b->is == NULL) return ALLOCATION_FAILURE;
@@ -234,7 +235,7 @@ uint8_t pdk(struct bm *b, FILE *fp)
 			b->i->l = (uint32_t *)malloc(sizeof(uint32_t));
 			if (b->i->l == NULL) return ALLOCATION_FAILURE;
 
-			b->i->l = NULL;
+//			b->i->l = NULL;
 			b->hp = (void *)b->i->l;
 		}						
 
@@ -336,7 +337,7 @@ uint8_t plv(struct bm *b, FILE *fp)
 
 uint8_t cs(struct bm *b, char *in, size_t *l)
 {
-	unsigned char md_v[40];
+	unsigned char md_v[40] = {0};
 	unsigned int md_l, i;
 	char *ptr;
 
