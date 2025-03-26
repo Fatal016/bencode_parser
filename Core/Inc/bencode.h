@@ -81,7 +81,7 @@ struct bm {
 typedef uint8_t (*id)(struct bm*, FILE*);
 
 /* For identifying type of component being read */
-id idt(int);
+id idt(int32_t*);
 
 /* Bencode component parsing functions definitions */
 uint8_t d(struct bm*, FILE*); 	/* dictionary */
@@ -104,7 +104,5 @@ uint8_t plv(struct bm*, FILE*); /* parse list value */
 /* Logic Functions */
 uint8_t cih(struct bm*, FILE*); /* calculate info hash */
 uint8_t cs(struct bm*, char*, size_t*); /* calculate sha */
-uint8_t sha1(struct bm*, char*, size_t*);
-
 
 #endif
